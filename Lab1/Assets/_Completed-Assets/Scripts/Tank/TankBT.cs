@@ -54,7 +54,13 @@ namespace Complete
                 case 1:
                     return SpinBehaviour(-0.05f, 1f);
                 case 2:
-                    return RandomFireBehaviour(); // 新增随机发射行为
+                    return new Root(RandomFireNode()); // 随机开火
+                case 3:
+                    return new Root(RandomTurnNode()); // 随机转向
+                case 4:
+                    return new Root(RandomTurnAndFire());// 结合随机转向和开火
+                case 5:
+                    return new Root(RandomCombinedBehaviour());
                 // Default behaviour: turn slowly
                 default:
                     return TurnSlowly();
@@ -160,12 +166,46 @@ namespace Complete
         }
 
         /*New Behaviors*/
-        private Root RandomFireBehaviour()
+
+        //---1 随机开火
+        private Node RandomFireNode()
         {
-            return new Root(
-                new Action(() => Fire(UnityEngine.Random.Range(0.0f, 5.0f))) // 随机力量发射
+            return new Action(() => Fire(UnityEngine.Random.Range(0.0f, 1.0f)));
+        }
+
+        //---2 随机转向
+        private Node RandomTurnNode()
+        {
+            return new Sequence(
+                new Action(() => Turn(UnityEngine.Random.Range(-1.0f, 1.0f))),
+                new Wait(UnityEngine.Random.Range(1.0f, 3.0f))
             );
         }
 
+        //---3 组合随机开火+转向
+        private Node RandomTurnAndFire()
+        {
+            return new Sequence(
+                 RandomTurnNode(),
+                 RandomFireNode()
+            );
+        }
+
+        //---4 随机移动
+        private Node RandomMove()
+        {
+            return new Sequence(
+                 new Action(() => Move(UnityEngine.Random.Range(-1.0f, 1.0f))),
+                 new Wait(UnityEngine.Random.Range(1.0f, 3.0f))
+
+            );
+        }
+        private Node RandomCombinedBehaviour()
+        {
+            return new Sequence(
+                 RandomMove(),       // 随机移动
+                 RandomTurnAndFire() // 随机转向和发射
+            );
+        }
     }
 }
